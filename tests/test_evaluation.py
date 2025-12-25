@@ -285,8 +285,10 @@ class TestFaithfulnessEvaluator:
         evaluator = FaithfulnessEvaluator()
         score = evaluator.evaluate_pair("Source", "Sentence one.")
 
-        # Verify download was called
-        mock_download.assert_called_once_with("punkt")
+        # Verify download was called for both punkt and punkt_tab
+        assert mock_download.call_count == 2
+        mock_download.assert_any_call("punkt")
+        mock_download.assert_any_call("punkt_tab")
         assert isinstance(score, float)
 
     @patch("transformers.pipeline")
@@ -442,7 +444,10 @@ class TestRedundancyEvaluator:
         evaluator = RedundancyEvaluator()
         evaluator.evaluate_pair("Sentence.")
 
-        mock_download.assert_called_once_with("punkt")
+        # Verify download was called for both punkt and punkt_tab
+        assert mock_download.call_count == 2
+        mock_download.assert_any_call("punkt")
+        mock_download.assert_any_call("punkt_tab")
 
     @patch("nltk.sent_tokenize")
     def test_redundancy_empty_ngrams(self, mock_sent_tokenize):
