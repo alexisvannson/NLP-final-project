@@ -67,11 +67,11 @@ class RougeEvaluator:
 class BertScoreEvaluator:
     """BERTScore evaluator for semantic similarity."""
 
-    def __init__(self, model_type: str = "microsoft/deberta-xlarge-mnli"):
+    def __init__(self, model_type: str = "distilbert-base-uncased"):
         """Initialize BERTScore evaluator.
 
         Args:
-            model_type: Model to use for BERTScore
+            model_type: Model to use for BERTScore (using lightweight distilbert)
         """
         self.model_type = model_type
 
@@ -102,11 +102,11 @@ class BertScoreEvaluator:
 class FaithfulnessEvaluator:
     """Faithfulness evaluator using NLI to detect hallucinations."""
 
-    def __init__(self, model_name: str = "facebook/bart-large-mnli"):
+    def __init__(self, model_name: str = "typeform/distilbert-base-uncased-mnli"):
         """Initialize faithfulness evaluator.
 
         Args:
-            model_name: NLI model to use
+            model_name: NLI model to use (using lightweight distilbert)
         """
         from transformers import pipeline
 
@@ -540,30 +540,72 @@ def main():
     """Main evaluation script."""
     parser = argparse.ArgumentParser(description="Evaluate summarization models")
     parser.add_argument(
-        "--predictions", type=str, required=True, help="Path to predictions file"
+        "--predictions", type=str, help="Path to predictions file"
     )
     parser.add_argument(
-        "--references", type=str, required=True, help="Path to references file"
+        "--references", type=str, help="Path to references file"
     )
     parser.add_argument("--sources", type=str, help="Path to source documents")
     parser.add_argument(
         "--output", type=str, default="evaluation_results.json", help="Output file"
     )
     parser.add_argument("--all-models", action="store_true", help="Evaluate all models")
+    parser.add_argument(
+        "--dataset", type=str, default="arxiv", help="Dataset to use (default: arxiv)"
+    )
+    parser.add_argument(
+        "--num-samples", type=int, default=50, help="Number of samples to evaluate (default: 50)"
+    )
 
     args = parser.parse_args()
 
-    # Load data
-    with open(args.predictions, "r") as f:
-        predictions = [line.strip() for line in f]
+    # Handle --all-models flag
+    if args.all_models:
+        from pathlib import Path
 
-    with open(args.references, "r") as f:
-        references = [line.strip() for line in f]
+        # Load test data
+        data_path = Path("data/processed") / args.dataset / "test.json"
 
-    sources = None
-    if args.sources:
-        with open(args.sources, "r") as f:
-            sources = [line.strip() for line in f]
+        if not data_path.exists():
+            print(f"Error: Test data not found at {data_path}")
+            print("Please run 'make preprocess' first to prepare the dataset.")
+            return
+
+        with open(data_path, "r") as f:
+            test_data = json.load(f)
+
+        # Limit samples if specified
+        if args.num_samples:
+            test_data = test_data[:args.num_samples]
+
+        # Extract references and sources
+        references = [item.get("summary", item.get("abstract", "")) for item in test_data]
+        sources = [item.get("article", item.get("document", "")) for item in test_data]
+
+        print(f"Loaded {len(references)} samples from {args.dataset} dataset")
+        print("Note: --all-models currently evaluates the reference summaries")
+        print("To evaluate model predictions, use --predictions <path>")
+
+        # For now, evaluate the references against themselves as a placeholder
+        # In a real scenario, you'd load model predictions here
+        predictions = references
+
+    else:
+        # Original behavior: require predictions and references
+        if not args.predictions or not args.references:
+            parser.error("--predictions and --references are required when not using --all-models")
+
+        # Load data
+        with open(args.predictions, "r") as f:
+            predictions = [line.strip() for line in f]
+
+        with open(args.references, "r") as f:
+            references = [line.strip() for line in f]
+
+        sources = None
+        if args.sources:
+            with open(args.sources, "r") as f:
+                sources = [line.strip() for line in f]
 
     # Run evaluation
     evaluator = ComprehensiveEvaluator()

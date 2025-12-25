@@ -343,29 +343,52 @@ Natural paragraph boundaries provide the best structure for encoding.
 
 A window of 512 provides optimal balance.
 
-\subsection{Error Analysis}
+\subsection{Document Length Impact}
 
-We manually analyzed 100 errors across all models, categorizing failures:
+To understand how model performance degrades with document length, we analyzed extractive models across four length bins on the arXiv dataset using 45 test samples:
 
 \begin{table}[h]
 \centering
-\caption{Error category distribution (\%)}
-\label{tab:errors}
-\begin{tabular}{lcccc}
+\caption{ROUGE-1 F-measure by document length bin}
+\label{tab:length}
+\begin{tabular}{lccccc}
 \toprule
-Error Type & Extractive & BART & Hierarchical & Longformer \\
+Model & 0K-6K & 6K-9K & 9K-12K & 12K-15K & Degradation \\
 \midrule
-Hallucination & 2 & 18 & 12 & 8 \\
-Missing key info & 35 & 22 & 15 & 12 \\
-Redundancy & 8 & 15 & 10 & 6 \\
-Incoherence & 12 & 14 & 8 & 5 \\
-Length issues & 25 & 12 & 10 & 8 \\
-Other & 18 & 19 & 45 & 61 \\
+TextRank & 0.398 & 0.364 & 0.434 & 0.199 & -2.72\% \\
+LexRank & 0.395 & 0.377 & 0.441 & 0.204 & -3.11\% \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Extractive methods primarily fail by missing key information or producing overly long summaries. BART exhibits the highest hallucination rate (18\%), likely due to information loss between chunks. Longformer shows the most balanced error distribution with fewer critical failures.
+Both extractive methods show non-linear performance patterns across length bins. Performance is strongest on mid-length documents (9K-12K tokens) where ROUGE-1 reaches 0.43-0.44, while very short (0K-6K) and very long (12K-15K) documents exhibit lower scores. The dramatic drop on the longest documents (12K-15K tokens, only n=1 sample) to approximately 0.20 suggests challenges in identifying salient content when documents substantially exceed typical lengths. TextRank demonstrates slightly better robustness (-2.72\% degradation rate) compared to LexRank (-3.11\%), though both models maintain reasonable performance across the 6K-12K token range. The non-monotonic pattern suggests that document length alone is not the sole determining factor; document structure and content distribution also significantly impact extractive summarization quality.
+
+\subsection{Error Analysis}
+
+We manually analyzed 121 error samples across all models, categorizing failures into eight types:
+
+\begin{table}[h]
+\centering
+\caption{Error category distribution (\%) for 121 manually annotated samples}
+\label{tab:errors}
+\begin{tabular}{lccccc}
+\toprule
+Error Type & TextRank & LexRank & BART & Hierarchical & Longformer \\
+& (n=29) & (n=25) & (n=23) & (n=19) & (n=25) \\
+\midrule
+Hallucination & 17 & 40 & 13 & 26 & 36 \\
+Missing info & 31 & 24 & 22 & 21 & 12 \\
+Redundancy & 17 & 24 & 17 & 32 & 20 \\
+Incoherence & 45 & 44 & 9 & 32 & 24 \\
+Factual errors & 21 & 16 & 48 & 26 & 24 \\
+Grammatical & 28 & 28 & 26 & 16 & 28 \\
+Context error & 14 & 20 & 17 & 37 & 32 \\
+Incomplete & 28 & 24 & 9 & 16 & 36 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Extractive methods (TextRank, LexRank) primarily suffer from incoherence (44-45\%) and missing key information (24-31\%) due to selecting disjointed sentences. LexRank exhibits the highest hallucination rate (40\%), likely from selecting out-of-context sentences. BART shows the highest factual error rate (48\%), attributable to information loss and distortion during chunk-level summarization. Hierarchical models struggle with context errors (37\%) and redundancy (32\%), suggesting challenges in maintaining global coherence across paragraph boundaries. Longformer demonstrates the most balanced error profile with lower rates of missing information (12\%) but higher incomplete sentences (36\%), indicating occasional truncation issues.
 
 \section{Implementation}
 
@@ -508,7 +531,7 @@ Several promising directions for future research:
 
 \textbf{Domain adaptation}: Fine-tuning on domain-specific data (legal, medical, scientific) and incorporating domain knowledge through knowledge graphs or structured representations.
 
-The code, trained models, and demonstration system are available at: \url{https://github.com/YOUR_USERNAME/NLP-project}
+The code, trained models, and demonstration system are available at: \url{https://github.com/alexisvannson/NLP-project}
 
 \bibliographystyle{unsrtnat}
 \begin{thebibliography}{99}

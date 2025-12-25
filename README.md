@@ -1,6 +1,6 @@
 # Long Document Summarization System
 
-[![CI/CD Pipeline](https://github.com/alexisvannson/NLP-project/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/alexisvannson/NLP-project/actions)
+[![CI/CD Pipeline](https://github.com/YOUR_USERNAME/NLP-project/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/YOUR_USERNAME/NLP-project/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -70,14 +70,25 @@ This project implements and compares multiple approaches to long document summar
 
 ```bash
 # Clone the repository
-git clone https://github.com/alexisvannson/NLP-project.git
+git clone https://github.com/YOUR_USERNAME/NLP-project.git
 cd NLP-project
 
+# Complete setup (venv + dependencies + download data)
+make setup
+
+# Preprocess datasets
+make preprocess
+```
+
+Or step by step:
+```bash
 # Create virtual environment and install dependencies
 make install
 
-# Download and preprocess datasets
+# Download datasets
 make download-data
+
+# Preprocess datasets
 make preprocess
 ```
 
@@ -104,6 +115,24 @@ python data/scripts/preprocess.py
 
 ## Quick Start
 
+### Complete Setup
+
+```bash
+# 1. Setup project (venv + dependencies + download data)
+make setup
+
+# 2. Preprocess datasets
+make preprocess
+
+# 3. Download pretrained models (optional, for quick testing)
+make setup-models
+
+# 4. Launch demo
+make demo
+```
+
+Visit `http://localhost:8501` to access the interactive demo.
+
 ### Running the Demo
 
 ```bash
@@ -114,7 +143,47 @@ make demo
 streamlit run app.py
 ```
 
-Visit `http://localhost:8501` to access the interactive demo.
+### Available Makefile Commands
+
+The project includes a comprehensive Makefile for common tasks. View all available commands with:
+
+```bash
+make help
+```
+
+**Setup & Installation:**
+- `make install` - Install dependencies and create virtual environment
+- `make setup` - Complete project setup (venv + deps + download data)
+- `make download-data` - Download datasets
+- `make preprocess` - Preprocess datasets
+
+**Code Quality:**
+- `make lint` - Run code linting (black, flake8, mypy)
+- `make format` - Format code (isort, black)
+- `make test` - Run tests with coverage
+
+**Model Management:**
+- `make setup-models` - Download pretrained models (no fine-tuning)
+- `make finetune-all` - Fine-tune all models (requires GPU, several hours)
+
+**Evaluation & Analysis:**
+- `make compare-quick` - Quick model comparison (10 samples, extractive only)
+- `make compare` - Standard comparison (50 samples, all models)
+- `make compare-full` - Full comparison (100 samples, all models)
+- `make evaluate` - Run evaluation suite
+- `make analyze-length-quick` - Quick length analysis (50 samples)
+- `make analyze-length` - Standard length analysis (100 samples)
+- `make analyze-length-full` - Comprehensive length analysis (200 samples)
+- `make analyze-sections-quick` - Quick section analysis (30 samples)
+- `make analyze-sections` - Standard section analysis (50 samples)
+
+**Demo & Deployment:**
+- `make demo` - Launch Streamlit demo
+- `make docker-build` - Build Docker image
+- `make docker-run` - Run Docker container
+
+**Utilities:**
+- `make clean` - Clean generated files (pyc, cache, etc.)
 
 ### Running Models
 
@@ -225,29 +294,39 @@ We use four primary datasets for training and evaluation:
 
 ## Training
 
-### Train Baseline Models
+### Setup Models (Download Pretrained)
 
 ```bash
-# Train extractive baselines (no training needed - rule-based)
-
-# Train BART baseline
-make train-baseline
-
-# Or with custom config:
-python src/training.py --config configs/baseline.yaml
+# Download pretrained models without fine-tuning
+make setup-models
 ```
 
-### Train Advanced Models
+This will download all pretrained models (BART, Hierarchical, Longformer) without fine-tuning them. This is useful for quick testing and inference.
+
+### Fine-tune Models
 
 ```bash
-# Train hierarchical model
+# Fine-tune all models (requires GPU, several hours)
+make finetune-all
+```
+
+This will fine-tune all three models (baseline, hierarchical, longformer) on your dataset. **Note**: This requires:
+- Processed data (`data/processed/`)
+- ~4GB disk space
+- GPU recommended
+- Several hours of training time
+
+The command will prompt for confirmation before starting.
+
+### Manual Training
+
+You can also train models individually with custom configs:
+
+```bash
+# Train with custom config
+python src/training.py --config configs/baseline.yaml
 python src/training.py --config configs/hierarchical.yaml
-
-# Train with Longformer
 python src/training.py --config configs/longformer.yaml
-
-# Train all models
-make train-all
 ```
 
 ### Configuration
@@ -260,12 +339,48 @@ Edit `configs/*.yaml` files to customize:
 
 ## Evaluation
 
-### Running Evaluation
+### Model Comparison
+
+```bash
+# Quick comparison (10 samples, extractive only)
+make compare-quick
+
+# Standard comparison (50 samples, all models)
+make compare
+
+# Full comparison (100 samples, all models - takes 30-60 min)
+make compare-full
+```
+
+### Running Evaluation Suite
 
 ```bash
 # Evaluate all models
 make evaluate
+```
 
+### Analysis Scripts
+
+```bash
+# Length degradation analysis (50 samples, extractive only)
+make analyze-length-quick
+
+# Standard length analysis (100 samples)
+make analyze-length
+
+# Comprehensive length analysis (200 samples - takes 60-90 min)
+make analyze-length-full
+
+# Section structure analysis (30 samples)
+make analyze-sections-quick
+
+# Standard section analysis (50 samples, with model comparison)
+make analyze-sections
+```
+
+### Manual Evaluation
+
+```bash
 # Or manually:
 python src/evaluation.py --predictions results/predictions.txt \
                         --references results/references.txt \
@@ -424,7 +539,7 @@ long-doc-summarization/
 ├── tests/
 │   └── test_models.py          # Unit tests
 ├── app.py                      # Streamlit demo
-├── Makefile                    # Automation
+├── Makefile                    # Automation (see available targets with `make help`)
 ├── Dockerfile                  # Container definition
 ├── requirements.txt            # Dependencies
 └── README.md                   # This file
@@ -494,11 +609,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Datasets from arXiv, PubMed, and research institutions
 - NLP community for open-source tools and libraries
 
-## Contact
-
-For questions or feedback:
-- GitHub Issues: [https://github.com/alexisvannson/NLP-project/issues](https://github.com/alexisvannson/NLP-project/issues)
-- Email: vannson.alexis@gmail.com
 
 ---
 
