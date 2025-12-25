@@ -99,6 +99,7 @@ def highlight_text(text: str, summary: str) -> str:
         summary_sentences = nltk.sent_tokenize(summary)
     except LookupError:
         nltk.download("punkt")
+        nltk.download("punkt_tab")
         summary_sentences = nltk.sent_tokenize(summary)
 
     # Simple matching (could be improved)

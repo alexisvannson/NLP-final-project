@@ -335,6 +335,7 @@ class HierarchicalTransformerSummarizer:
                 sentences = nltk.sent_tokenize(text)
             except LookupError:
                 nltk.download("punkt")
+                nltk.download("punkt_tab")
                 sentences = nltk.sent_tokenize(text)
 
             # Group sentences into pseudo-paragraphs

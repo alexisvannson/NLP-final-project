@@ -93,7 +93,7 @@ pip install -r requirements.txt
 
 # Download required models
 python -m spacy download en_core_web_sm
-python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords')"
 
 # Download datasets
 python data/scripts/download_datasets.py

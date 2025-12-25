@@ -42,6 +42,7 @@ def split_into_sentences(text: str) -> List[str]:
         return sentences
     except LookupError:
         nltk.download("punkt")
+        nltk.download("punkt_tab")
         sentences = nltk.sent_tokenize(text)
         return sentences
 
@@ -246,6 +247,7 @@ def main() -> None:
         nltk.data.find("tokenizers/punkt")
     except LookupError:
         nltk.download("punkt")
+        nltk.download("punkt_tab")
 
     # Process each dataset
     datasets = ["arxiv", "pubmed", "multi_news", "booksum", "billsum", "cnn_dailymail"]

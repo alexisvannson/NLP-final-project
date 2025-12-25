@@ -129,6 +129,7 @@ class FaithfulnessEvaluator:
             summary_sentences = nltk.sent_tokenize(summary)
         except LookupError:
             nltk.download("punkt")
+            nltk.download("punkt_tab")
             summary_sentences = nltk.sent_tokenize(summary)
 
         if not summary_sentences:
@@ -396,6 +397,7 @@ class RedundancyEvaluator:
             sentences = nltk.sent_tokenize(summary)
         except LookupError:
             nltk.download("punkt")
+            nltk.download("punkt_tab")
             sentences = nltk.sent_tokenize(summary)
 
         if len(sentences) <= 1:

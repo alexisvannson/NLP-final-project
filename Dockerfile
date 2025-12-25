@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Download spaCy model and NLTK data
 RUN python -m spacy download en_core_web_sm && \
-    python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+    python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords')"
 
 # Copy project files
 COPY . .

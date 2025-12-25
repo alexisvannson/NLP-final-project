@@ -45,6 +45,7 @@ class TextRankSummarizer:
             sentences = nltk.sent_tokenize(text)
         except LookupError:
             nltk.download("punkt")
+            nltk.download("punkt_tab")
             sentences = nltk.sent_tokenize(text)
         return sentences
 
@@ -180,6 +181,7 @@ class LexRankSummarizer:
             sentences = nltk.sent_tokenize(text)
         except LookupError:
             nltk.download("punkt")
+            nltk.download("punkt_tab")
             sentences = nltk.sent_tokenize(text)
         return sentences
 

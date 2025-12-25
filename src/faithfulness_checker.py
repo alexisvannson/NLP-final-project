@@ -36,6 +36,7 @@ class FaithfulnessChecker:
             return nltk.sent_tokenize(text)
         except LookupError:
             nltk.download("punkt")
+            nltk.download("punkt_tab")
             return nltk.sent_tokenize(text)
 
     def check_sentence_faithfulness(
