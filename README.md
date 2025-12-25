@@ -1,6 +1,6 @@
 # Long Document Summarization System
 
-[![CI/CD Pipeline](https://github.com/YOUR_USERNAME/NLP-project/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/YOUR_USERNAME/NLP-project/actions)
+[![CI/CD Pipeline](https://github.com/alexisvannson/NLP-project/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/alexisvannson/NLP-project/actions)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -70,7 +70,7 @@ This project implements and compares multiple approaches to long document summar
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/NLP-project.git
+git clone https://github.com/alexisvannson/NLP-project.git
 cd NLP-project
 
 # Create virtual environment and install dependencies
@@ -497,8 +497,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For questions or feedback:
-- GitHub Issues: [https://github.com/YOUR_USERNAME/NLP-project/issues](https://github.com/YOUR_USERNAME/NLP-project/issues)
-- Email: your.email@example.com
+- GitHub Issues: [https://github.com/alexisvannson/NLP-project/issues](https://github.com/alexisvannson/NLP-project/issues)
+- Email: vannson.alexis@gmail.com
 
 ---
 
