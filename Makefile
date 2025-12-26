@@ -99,8 +99,6 @@ finetune-all:
 		echo "Cancelled."; \
 	fi
 
-
-
 compare:
 	@echo "Comparing all 6 models on 50 samples..."
 	@if [ ! -d "data/processed/arxiv" ]; then \

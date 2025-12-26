@@ -369,10 +369,16 @@ def generate_report(df: pd.DataFrame, output_dir: Path, dataset_name: str, num_s
         # Format table for markdown
         f.write("### ROUGE Scores\n\n")
         rouge_cols = ["Model", "rouge1_fmeasure", "rouge2_fmeasure", "rougeL_fmeasure"]
+        rouge_col_names = {
+            "Model": "Model",
+            "rouge1_fmeasure": "ROUGE-1",
+            "rouge2_fmeasure": "ROUGE-2",
+            "rougeL_fmeasure": "ROUGE-L"
+        }
         rouge_cols = [c for c in rouge_cols if c in df.columns]
         if rouge_cols:
             rouge_df = df[rouge_cols].copy()
-            rouge_df.columns = ["Model", "ROUGE-1", "ROUGE-2", "ROUGE-L"]
+            rouge_df.columns = [rouge_col_names[c] for c in rouge_cols]
             f.write(rouge_df.to_markdown(index=False, floatfmt=".4f"))
             f.write("\n\n")
 
@@ -384,10 +390,17 @@ def generate_report(df: pd.DataFrame, output_dir: Path, dataset_name: str, num_s
             "coverage_mean",
             "redundancy_mean",
         ]
+        quality_col_names = {
+            "Model": "Model",
+            "bertscore_f1": "BERTScore",
+            "faithfulness_mean": "Faithfulness",
+            "coverage_mean": "Coverage",
+            "redundancy_mean": "Redundancy"
+        }
         quality_cols = [c for c in quality_cols if c in df.columns]
         if quality_cols:
             quality_df = df[quality_cols].copy()
-            quality_df.columns = ["Model", "BERTScore", "Faithfulness", "Coverage", "Redundancy"]
+            quality_df.columns = [quality_col_names[c] for c in quality_cols]
             f.write(quality_df.to_markdown(index=False, floatfmt=".4f"))
             f.write("\n\n")
 
