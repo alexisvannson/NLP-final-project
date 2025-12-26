@@ -11,6 +11,8 @@ import streamlit as st
 # Import models
 from models.baseline_abstractive import BARTChunkSummarizer
 from models.baseline_extractive import LexRankSummarizer, TextRankSummarizer
+from models.hierarchical_transformer import HierarchicalTransformerSummarizer
+from models.longformer_summarizer import LongformerSummarizer
 from models.sliding_window import SlidingWindowSummarizer
 from src.faithfulness_checker import FaithfulnessChecker
 
@@ -53,6 +55,8 @@ def load_models():
         "LexRank (Extractive)": LexRankSummarizer(num_sentences=5),
         "BART Chunks (Abstractive)": BARTChunkSummarizer(),
         "Sliding Window (Abstractive)": SlidingWindowSummarizer(),
+        "Hierarchical Transformer (Abstractive)": HierarchicalTransformerSummarizer(),
+        "Longformer/LED (Sparse Attention)": LongformerSummarizer(),
     }
     return models
 
@@ -168,6 +172,8 @@ def main():
             "LexRank (Extractive)",
             "BART Chunks (Abstractive)",
             "Sliding Window (Abstractive)",
+            "Hierarchical Transformer (Abstractive)",
+            "Longformer/LED (Sparse Attention)",
         ],
     )
 
