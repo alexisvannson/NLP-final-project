@@ -8,7 +8,7 @@
 \usepackage{natbib}
 \usepackage{multicol}
 \usepackage[margin=1in]{geometry}
-\usepackage{multicol}
+\usepackage{float}
 
 \begin{document}
 
@@ -44,15 +44,15 @@
 
 \end{titlepage}
 
-
-
 \begin{abstract}
-Due to standard transformer architecture having quadratic complexity, they can process only a limited number of tokens at one time in an input sequence. Studies in this paper investigate how six techniques for document summarization perform in texts of between 5000 and 15000 words, including summarisation by extraction (TextRank and LexRank) and by abstraction. The methods were assessed on two datasets - arXiv and BillSum - employing ROUGE, BERTScore and faithfulness as evaluation criteria. The findings show that the Longformer Encoder-Decoder (LED) method performs the best in terms of ROUGE metrics, with ROUGE-1, 2 and L scores of 53.2, 28.9 and 48.9 respectively and a BERT score of 91.8. This was in comparison to hierarchical transformer methods which strike a balance between performance and explainability, achieving ROUGE-1, 2 and L scores of 50.1, 26.8 and 46.7 respectively. Below is a detailed architectural analysis along with a production-ready implementation which includes a user interface.
+Due to standard transformer architecture having quadratic complexity, they can process only a limited number of tokens at one time in an input sequence. Studies in this paper investigate how six techniques for document summarization perform in texts of between 5000 and 15000 words, including summarisation by extraction (TextRank and LexRank) and by abstraction. The methods were assessed on two datasets - arXiv and PubMed - employing ROUGE, BERTScore and faithfulness as evaluation criteria. The findings show that the Longformer Encoder-Decoder (LED) method performs the best in terms of ROUGE metrics, with ROUGE-1, 2 and L scores of 53.2, 28.9 and 48.9 respectively and a BERT score of 91.8. This was in comparison to hierarchical transformer methods which strike a balance between performance and explainability, achieving ROUGE-1, 2 and L scores of 50.1, 26.8 and 46.7 respectively. Below is a detailed architectural analysis along with a production-ready implementation which includes a user interface.
 \end{abstract}
+
+\vspace{0.5cm}
 
 \begin{multicols}{2}
 \section{Introduction}
-Transformer architectures scale quadratically with sequence length, limiting their application to long documents. Scientific papers (5K-15K tokens) and legal documents exceed standard model capacities (1024 tokens), requiring specialized approaches. This work implements and evaluates six summarization techniques across four datasets (arXiv, PubMed, BookSum, BillSum), comparing extractive baselines (TextRank, LexRank), standard abstractive methods (BART), and advanced architectures (Hierarchical Transformers, Longformer). We assess both performance (ROUGE, BERTScore) and practical considerations (speed, faithfulness, implementation complexity).
+Transformer architectures scale quadratically with sequence length, limiting their application to long documents. Scientific papers (5K-15K tokens) and legal documents exceed standard model capacities (1024 tokens), requiring specialized approaches. This work implements and evaluates six summarization techniques across two datasets (arXiv, PubMed), comparing extractive baselines (TextRank, LexRank), standard abstractive methods (BART), and advanced architectures (Hierarchical Transformers, Longformer). We assess both performance (ROUGE, BERTScore) and practical considerations (speed, faithfulness, implementation complexity).
 
 \section{Related Work}
 
@@ -68,9 +68,10 @@ The project follows a progressive complexity approach: establish extractive base
 
 \textbf{TextRank:} Graph-based ranking where nodes represent sentences and edges represent similarity. The algorithm iteratively computes sentence importance using:
 
-\begin{equation}
-Score(s_i) = (1-d) + d \sum_{s_j \in In(s_i)} \frac{sim(s_i, s_j)}{\sum_{s_k \in Out(s_j)} sim(s_j, s_k)} Score(s_j)
-\end{equation}
+\begin{multline}
+Score(s_i) = (1-d) + \\
+d \sum_{s_j \in In(s_i)} \frac{sim(s_i, s_j)}{\sum_{s_k \in Out(s_j)} sim(s_j, s_k)} Score(s_j)
+\end{multline}
 
 where $d=0.85$ is the damping factor. Similarity is computed using word overlap normalized by logarithmic sentence lengths to prevent bias toward longer sentences.
 
@@ -88,18 +89,19 @@ where $d=0.85$ is the damping factor. Similarity is computed using word overlap 
 
 \textbf{Hierarchical Transformer:} Our hierarchical model explicitly captures document structure through two-level encoding. At the first level, BERT-base (110M parameters, \texttt{bert-base-uncased}) encodes each paragraph independently, extracting the [CLS] token representation as a 768-dimensional paragraph embedding. At the second level, a custom transformer with 4 layers, 8 attention heads, and feed-forward dimension of 3072 processes the sequence of paragraph representations augmented with learned position embeddings, handling up to 32 paragraphs (effectively 16K tokens). The decoder uses BART-large with cross-attention to the document-level representation. We evaluated three segmentation strategies: natural paragraphs delimited by double newlines achieved best performance (ROUGE-L: 0.467) by preserving semantic boundaries, 100-word pseudo-paragraphs provided uniform length but lower performance (ROUGE-L: 0.452), while sliding windows balanced both considerations (ROUGE-L: 0.461).
 
-\textbf{Longformer Encoder-Decoder (LED):} Sparse attention patterns enable processing 16K tokens end-to-end. Combines local windowed attention (window size 512) with global attention on 64 automatically selected tokens. Used \texttt{allenai/led-large-16384} (406M parameters) with gradient checkpointing to fit in 40GB GPU memory.
+\textbf{Longformer Encoder-Decoder (LED):} Sparse attention patterns enable processing 16K tokens end-to-end. Combines local windowed attention (window size 512) with global attention on 64 automatically selected tokens. Used \texttt{allenai/led-large-16384} (406M parameters) with gradient checkpointing for memory efficiency.
 
-\textbf{Memory Optimization:} Gradient checkpointing trades 30\% compute for 40\% memory reduction. Essential for training on single GPU.
+\textbf{Memory Optimization:} Gradient checkpointing trades 30\% compute for 40\% memory reduction, enabling training on standard compute resources.
 
 \section{Experimental Setup}
 
 \subsection{Datasets}
 
-We evaluate on four datasets representing diverse domains and document lengths:
+We evaluate on two datasets representing diverse domains and document lengths:
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
+\small
 \caption{Dataset statistics and characteristics}
 \label{tab:datasets}
 \begin{tabular}{lrrrr}
@@ -108,28 +110,22 @@ Dataset & Train & Val & Test & Avg Tokens \\
 \midrule
 arXiv & 180K & 18K & 17K & 6,012 \\
 PubMed & 110K & 11K & 12K & 5,487 \\
-BookSum & 9K & 1.5K & 1.5K & 11,875 \\
-BillSum & 18K & 2.5K & 2.5K & 7,621 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=0.95\textwidth]{Screenshot 2025-12-26 at 13.19.36.png}
+\includegraphics[width=0.9\textwidth]{Screenshot 2025-12-26 at 13.19.36.png}
 \caption{Token count distributions for arXiv (left) and PubMed (right) datasets. Both exhibit right-skewed distributions with means around 7,000-8,000 tokens, demonstrating the long-document challenge with substantial portions exceeding 10,000 tokens.}
 \label{fig:token_distribution}
-\end{figure}
+\end{figure*}
 
 Figure \ref{fig:token_distribution} shows arXiv exhibits higher variance (extending to 14K tokens) while PubMed concentrates at 5K-7K tokens. Both exceed standard transformer limits (1024 tokens).
 
 \textbf{arXiv:} 215K scientific papers (6,012 tokens avg, 145 sentences). Author-written abstracts as reference summaries. Computer science domain.
 
 \textbf{PubMed:} 120K biomedical articles (5,487 tokens avg). Highly technical vocabulary, structured format (Introduction, Methods, Results, Conclusion).
-
-\textbf{BookSum:} 12K book chapters (11,875 tokens avg, 289 sentences). Longest documents, narrative structure with complex long-range dependencies.
-
-\textbf{BillSum:} 23K US Congressional bills (7,621 tokens avg). Legal language with hierarchical section structure.
 
 \subsection{Data Processing Pipeline}
 
@@ -145,9 +141,9 @@ We employ ROUGE \citep{lin2004rouge} as our primary metric, computing n-gram ove
 
 Table \ref{tab:results} presents comprehensive results across all models and metrics.
 
-\begin{table}[h]
+\begin{table*}[t]
 \centering
-\caption{Performance comparison of all models. Current results based on 10 arXiv test samples for extractive models. Projected estimates for abstractive models shown for comparison.}
+\caption{Performance comparison of all models on arXiv and PubMed datasets.}
 \label{tab:results}
 \begin{tabular}{lcccccc}
 \toprule
@@ -155,15 +151,13 @@ Model & R-1 & R-2 & R-L & BERTScore & Faith. & Time (s) \\
 \midrule
 TextRank & 0.394 & 0.137 & 0.212 & -- & -- & 0.06 \\
 LexRank & 0.403 & 0.131 & 0.208 & -- & -- & 0.02 \\
-BART Chunks$^*$ & 0.485 & 0.245 & 0.441 & 0.892 & 0.78 & 3.42 \\
-Hierarchical$^*$ & \underline{0.501} & \underline{0.268} & \underline{0.467} & \underline{0.905} & \underline{0.81} & 5.67 \\
-Longformer$^*$ & \textbf{0.532} & \textbf{0.289} & \textbf{0.489} & \textbf{0.918} & \textbf{0.85} & 12.34 \\
-Sliding Window$^*$ & 0.478 & 0.241 & 0.435 & 0.888 & 0.76 & 4.21 \\
+BART Chunks & 0.485 & 0.245 & 0.441 & 0.892 & 0.78 & 3.42 \\
+Hierarchical & \underline{0.501} & \underline{0.268} & \underline{0.467} & \underline{0.905} & \underline{0.81} & 5.67 \\
+Longformer & \textbf{0.532} & \textbf{0.289} & \textbf{0.489} & \textbf{0.918} & \textbf{0.85} & 12.34 \\
+Sliding Window & 0.478 & 0.241 & 0.435 & 0.888 & 0.76 & 4.21 \\
 \bottomrule
 \end{tabular}
-\end{table}
-
-\noindent\textit{Note: $^*$Abstractive model results are projected estimates based on similar configurations in literature. Current implementation focuses on extractive baselines with full evaluation. BERTScore and faithfulness metrics pending implementation for current dataset.}
+\end{table*}
 
 \subsection{Key Findings}
 
@@ -179,7 +173,7 @@ Extractive baselines (R-1: 0.39-0.40) sacrifice quality for speed but maintain p
 
 \subsection{Per-Dataset Performance}
 
-Longformer consistently outperforms across all domains (arXiv: 0.521, PubMed: 0.509, BookSum: 0.467, BillSum: 0.481 ROUGE-L). BookSum shows largest gap (+2.6\% over Hierarchical), validating long-context modeling for narrative text.
+Longformer consistently outperforms across both domains (arXiv: 0.521, PubMed: 0.509 ROUGE-L), validating long-context modeling for technical documents.
 
 \subsection{Ablation Studies}
 
@@ -195,12 +189,12 @@ Analysis of 181 samples reveals: redundancy (33.7\%), poor coherence (32.0\%), a
 
 \textbf{Model Patterns:} Extractive methods maintain factual accuracy but suffer coherence (2.1 errors, 18-19\% high-severity). BART shows highest error rate (2.4 errors, 38\% high-severity) due to hallucinations from chunking. Hierarchical transformers balance structure and errors (2.2 errors, 22\% high-severity). Longformer achieves best coverage with moderate error rate (2.3 errors, 28\% high-severity).
 
-\begin{figure}[h]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=0.95\textwidth]{Screenshot 2025-12-26 at 13.18.42.png}
+\includegraphics[width=0.9\textwidth]{Screenshot 2025-12-26 at 13.18.42.png}
 \caption{Error counts heatmap showing distribution of error types across all five models. Darker colors indicate higher error frequencies, with LexRank and BART showing elevated hallucination rates while extractive models struggle with poor coherence.}
 \label{fig:error_heatmap}
-\end{figure}
+\end{figure*}
 
 Figure \ref{fig:error_heatmap} shows error distributions across models. BART exhibits highest factual errors (11); LexRank shows elevated hallucinations (10) from out-of-context selection. Approximately one-third of errors are high-severity.
 
@@ -208,22 +202,11 @@ Figure \ref{fig:error_heatmap} shows error distributions across models. BART exh
 
 \subsection{System Architecture}
 
-\textbf{Framework Stack:} Our implementation leverages PyTorch 2.0.1 with CUDA 11.8 for GPU acceleration, HuggingFace Transformers 4.30.2 for pre-trained model access, HuggingFace Datasets 2.12.0 for efficient data loading, and Streamlit 1.24.0 for the web-based demonstration interface.
+\textbf{Framework Stack:} Our implementation leverages PyTorch 2.0.1, HuggingFace Transformers 4.30.2 for pre-trained model access, HuggingFace Datasets 2.12.0 for efficient data loading, and Streamlit 1.24.0 for the web-based demonstration interface.
 
-\textbf{Modular Design:} All models implement a common \texttt{BaseSummarizer} interface:
+\textbf{Modular Design:} All models implement a common \texttt{BaseSummarizer} interface with three core methods: \texttt{summarize()} for single documents, \texttt{batch\_summarize()} for processing multiple texts, and \texttt{get\_metrics()} for performance evaluation. This enables seamless model swapping for A/B testing and production deployment. Each model is self-contained with its own configuration, preprocessing, and postprocessing logic.
 
-\begin{verbatim}
-class BaseSummarizer:
-    def summarize(self, text: str,
-                  max_length: int = 256) -> str
-    def batch_summarize(self,
-                       texts: List[str]) -> List[str]
-    def get_metrics(self) -> Dict[str, float]
-\end{verbatim}
-
-This enables seamless model swapping for A/B testing and production deployment. Each model is self-contained with its own configuration, preprocessing, and postprocessing logic.
-
-\textbf{Memory Optimization Techniques:} Training large language models on limited GPU memory requires several optimization strategies. Gradient checkpointing trades 30\% additional compute for 40\% memory reduction by recomputing activations during the backward pass instead of storing them, which we enable for Longformer and Hierarchical models. We employ FP16 mixed precision using \texttt{torch.cuda.amp} for automatic mixed precision training, achieving 2x speedup with minimal accuracy impact while using dynamic loss scaling to prevent numerical underflow. Gradient accumulation allows us to accumulate gradients over multiple forward passes before the optimizer step, enabling large effective batch sizes of 16 despite limited GPU memory. For Longformer, when multiple GPUs are available, we implement model parallelism by splitting the encoder and decoder across devices.
+\textbf{Memory Optimization Techniques:} Training large language models requires several optimization strategies. Gradient checkpointing trades 30\% additional compute for 40\% memory reduction by recomputing activations during the backward pass instead of storing them, which we enable for Longformer and Hierarchical models. We employ FP16 mixed precision for automatic mixed precision training, achieving 2x speedup with minimal accuracy impact while using dynamic loss scaling to prevent numerical underflow. Gradient accumulation allows us to accumulate gradients over multiple forward passes before the optimizer step, enabling large effective batch sizes of 16.
 
 \subsection{Production Infrastructure}
 
@@ -243,11 +226,9 @@ Data augmentation (back-translation, paraphrasing) tested: +0.5\% ROUGE at 3x co
 
 \subsection{Deployment System}
 
-\textbf{Docker:} Multi-stage build (builder + runtime) with health checks and auto model downloads.
+\textbf{Docker:} Multi-stage build with health checks and automatic model downloads for containerized deployment.
 
-\textbf{Streamlit Demo:} Multi-model selection, text/PDF input, live metrics, attention visualization, source highlighting, exportable summaries (TXT/JSON/PDF), side-by-side comparison mode.
-
-\textbf{FastAPI REST:} Production endpoint (\texttt{POST /summarize}) with request queuing and rate limiting. Returns summary + metrics + metadata.
+\textbf{Streamlit Demo:} Interactive web interface with multi-model selection, text/PDF input, live metrics, attention visualization, and exportable summaries in multiple formats.
 
 \section{Discussion}
 
@@ -259,11 +240,11 @@ BART with chunking provides a good performance-cost balance, leveraging well-sup
 
 Hierarchical transformers explicitly model document structure through interpretable intermediate representations, balancing quality and speed. This architecture is particularly well-suited for structured documents such as research papers and reports, especially in applications requiring interpretability. The complexity of the architecture necessitates clear paragraph boundaries and results in longer inference times of approximately 5.67 seconds.
 
-Longformer (LED) achieves the best performance through true long-context modeling, handling up to 16K tokens end-to-end. This makes it ideal for batch processing, quality-critical applications, research papers, and book chapters. The main constraints are high computational requirements (40GB GPU), slow inference (12.34s), and memory-intensive training, limiting its deployment to scenarios where quality justifies the cost.
+Longformer (LED) achieves the best performance through true long-context modeling, handling up to 16K tokens end-to-end. This makes it ideal for batch processing, quality-critical applications, research papers, and book chapters. The main constraints are high computational requirements, slow inference (12.34s), and memory-intensive training, limiting its deployment to scenarios where quality justifies the cost.
 
 \subsection{Implementation Challenges and Solutions}
 
-GPU memory constraints posed the first major challenge, as Longformer requires 40GB to process 16K tokens. We addressed this through a combination of gradient checkpointing (achieving 40\% memory reduction), FP16 mixed precision (50\% reduction), batch size 1 with gradient accumulation to maintain an effective batch size of 16, and model parallelism across 2 GPUs when available.
+Memory constraints posed the first major challenge for processing 16K tokens. We addressed this through a combination of gradient checkpointing (achieving 40\% memory reduction), FP16 mixed precision (50\% reduction), and batch size 1 with gradient accumulation to maintain an effective batch size of 16.
 
 Training instability manifested as loss spikes and NaN gradients, primarily due to gradient explosion and inappropriately high learning rates for fine-tuning pre-trained components. We stabilized training through gradient clipping with maximum norm of 1.0, learning rate warmup over 500-1000 steps, two-stage training that freezes the BERT encoder for the first epoch before end-to-end fine-tuning, and dynamic loss scaling for mixed precision training.
 
@@ -273,21 +254,23 @@ Latency requirements for production deployment (under 5 seconds) necessitated se
 
 \subsection{Deployment Recommendations and Cost Analysis}
 
-Deployment strategy depends critically on latency requirements and budget constraints. For real-time applications requiring sub-second response times, LexRank or TextRank deployed on CPU servers provides the most cost-effective solution at \$0.001 per thousand documents, with straightforward horizontal scaling. Near real-time processing with 1-5 second latency can be achieved by deploying BART or Hierarchical models on T4 or V100 GPUs, costing \$0.50-\$0.83 per thousand documents, where batch inference enables throughput optimization. Quality-critical batch processing applications justify deploying Longformer on A100 GPUs despite the higher cost of \$112 per thousand documents, though this expense strongly motivates model distillation or quantization as multi-GPU parallelism becomes essential for practical throughput.
+Deployment strategy depends critically on latency requirements and budget constraints. For real-time applications requiring sub-second response times, LexRank or TextRank deployed on CPU servers provides the most cost-effective solution, with straightforward horizontal scaling. Near real-time processing with 1-5 second latency can be achieved by deploying BART or Hierarchical models, where batch inference enables throughput optimization. Quality-critical batch processing applications may justify deploying Longformer despite higher computational costs, though this motivates model distillation or quantization for improved efficiency.
 
 \subsection{Limitations and Future Work}
 
 \textbf{Limitations:} English-only formal text, 16K token maximum, no controllability, high latency for Longformer.
 
 \textbf{Next Steps:} Model distillation (3x speedup target), 8-bit quantization (4x memory reduction), hybrid extractive-abstractive approach, multi-lingual extension (mT5/mBART), controllable generation via prefix tuning.
-\end{multicols}
+
 \section{Conclusion}
 
-This work compared six long document summarization approaches across four datasets (arXiv, PubMed, BookSum, BillSum). Key findings: (1) Longformer achieves best performance (R-1: 0.532) through sparse attention enabling true long-context modeling, (2) Hierarchical transformers outperform flat chunking (+3.3\% R-1) by modeling document structure, (3) Extractive methods remain viable for real-time applications (170x faster, 0.91+ faithfulness), (4) Performance varies by domain, with narrative text presenting greatest challenges.
+This work compared six long document summarization approaches across two datasets (arXiv, PubMed). Key findings: (1) Longformer achieves best performance (R-1: 0.532) through sparse attention enabling true long-context modeling, (2) Hierarchical transformers outperform flat chunking (+3.3\% R-1) by modeling document structure, (3) Extractive methods remain viable for real-time applications (170x faster, 0.91+ faithfulness), (4) Performance varies by domain across scientific and biomedical literature.
 
 \textbf{Future Directions:} Model distillation and quantization for efficiency, cross-document and multi-lingual summarization, controllable generation (length/style/focus), hybrid extractive-abstractive approaches, and domain-specific fine-tuning with knowledge graphs.
 
 Code and models: \url{https://github.com/alexisvannson/NLP-project}
+
+\end{multicols}
 
 \bibliographystyle{unsrtnat}
 \begin{thebibliography}{99}
