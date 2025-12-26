@@ -156,7 +156,7 @@ class TestBertScoreEvaluator:
     def test_bertscore_initialization_default(self):
         """Test BertScoreEvaluator initialization with default model."""
         evaluator = BertScoreEvaluator()
-        assert evaluator.model_type == "microsoft/deberta-xlarge-mnli"
+        assert evaluator.model_type == "distilbert-base-uncased"
 
     def test_bertscore_initialization_custom(self):
         """Test BertScoreEvaluator initialization with custom model."""
@@ -227,7 +227,7 @@ class TestFaithfulnessEvaluator:
         evaluator = FaithfulnessEvaluator()
 
         mock_pipeline.assert_called_once_with(
-            "zero-shot-classification", model="facebook/bart-large-mnli"
+            "zero-shot-classification", model="typeform/distilbert-base-uncased-mnli"
         )
         assert evaluator.nli_model == mock_nli
 

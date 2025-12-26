@@ -259,13 +259,13 @@ class SectionCoverageEvaluator:
         import re
 
         sections = []
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         patterns = [
-            r'^#{1,6}\s+(.+)$',  # Markdown
-            r'^([A-Z][A-Z\s]{2,}):?\s*$',  # CAPS
-            r'^(\d+\.?\s+[A-Z][^.!?]*?)$',  # Numbered
-            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*):?\s*$',  # Title Case
+            r"^#{1,6}\s+(.+)$",  # Markdown
+            r"^([A-Z][A-Z\s]{2,}):?\s*$",  # CAPS
+            r"^(\d+\.?\s+[A-Z][^.!?]*?)$",  # Numbered
+            r"^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*):?\s*$",  # Title Case
         ]
 
         for line in lines:
@@ -274,8 +274,8 @@ class SectionCoverageEvaluator:
                 match = re.match(pattern, line_stripped)
                 if match:
                     title = match.group(1).strip()
-                    title = re.sub(r'^#+\s*', '', title)
-                    title = re.sub(r'^\d+\.?\s*', '', title)
+                    title = re.sub(r"^#+\s*", "", title)
+                    title = re.sub(r"^\d+\.?\s*", "", title)
                     sections.append(title.lower())
                     break
 
@@ -291,9 +291,17 @@ class SectionCoverageEvaluator:
             List of important section titles
         """
         important_keywords = [
-            'abstract', 'introduction', 'conclusion', 'summary',
-            'results', 'findings', 'discussion', 'methods',
-            'methodology', 'background', 'analysis'
+            "abstract",
+            "introduction",
+            "conclusion",
+            "summary",
+            "results",
+            "findings",
+            "discussion",
+            "methods",
+            "methodology",
+            "background",
+            "analysis",
         ]
 
         important = []
@@ -322,10 +330,10 @@ class SectionCoverageEvaluator:
 
         if not important_sections:
             return {
-                'num_source_sections': len(source_sections),
-                'num_important_sections': 0,
-                'sections_covered': 0,
-                'coverage_ratio': 1.0  # No important sections to cover
+                "num_source_sections": len(source_sections),
+                "num_important_sections": 0,
+                "sections_covered": 0,
+                "coverage_ratio": 1.0,  # No important sections to cover
             }
 
         # Check which sections are mentioned in summary
@@ -341,15 +349,13 @@ class SectionCoverageEvaluator:
         coverage_ratio = covered / len(important_sections) if important_sections else 0
 
         return {
-            'num_source_sections': len(source_sections),
-            'num_important_sections': len(important_sections),
-            'sections_covered': covered,
-            'coverage_ratio': coverage_ratio
+            "num_source_sections": len(source_sections),
+            "num_important_sections": len(important_sections),
+            "sections_covered": covered,
+            "coverage_ratio": coverage_ratio,
         }
 
-    def evaluate(
-        self, predictions: List[str], sources: List[str]
-    ) -> Dict:
+    def evaluate(self, predictions: List[str], sources: List[str]) -> Dict:
         """Evaluate section coverage for multiple summaries.
 
         Args:
@@ -366,16 +372,16 @@ class SectionCoverageEvaluator:
             results.append(result)
 
         # Aggregate
-        coverage_ratios = [r['coverage_ratio'] for r in results]
-        sections_covered = [r['sections_covered'] for r in results]
+        coverage_ratios = [r["coverage_ratio"] for r in results]
+        sections_covered = [r["sections_covered"] for r in results]
 
         return {
-            'section_coverage_mean': np.mean(coverage_ratios),
-            'section_coverage_std': np.std(coverage_ratios),
-            'avg_sections_covered': np.mean(sections_covered),
-            'total_documents_with_sections': sum(
-                1 for r in results if r['num_important_sections'] > 0
-            )
+            "section_coverage_mean": np.mean(coverage_ratios),
+            "section_coverage_std": np.std(coverage_ratios),
+            "avg_sections_covered": np.mean(sections_covered),
+            "total_documents_with_sections": sum(
+                1 for r in results if r["num_important_sections"] > 0
+            ),
         }
 
 
@@ -539,12 +545,8 @@ class ComprehensiveEvaluator:
 def main():
     """Main evaluation script."""
     parser = argparse.ArgumentParser(description="Evaluate summarization models")
-    parser.add_argument(
-        "--predictions", type=str, help="Path to predictions file"
-    )
-    parser.add_argument(
-        "--references", type=str, help="Path to references file"
-    )
+    parser.add_argument("--predictions", type=str, help="Path to predictions file")
+    parser.add_argument("--references", type=str, help="Path to references file")
     parser.add_argument("--sources", type=str, help="Path to source documents")
     parser.add_argument(
         "--output", type=str, default="evaluation_results.json", help="Output file"
@@ -554,7 +556,10 @@ def main():
         "--dataset", type=str, default="arxiv", help="Dataset to use (default: arxiv)"
     )
     parser.add_argument(
-        "--num-samples", type=int, default=50, help="Number of samples to evaluate (default: 50)"
+        "--num-samples",
+        type=int,
+        default=50,
+        help="Number of samples to evaluate (default: 50)",
     )
 
     args = parser.parse_args()
@@ -576,10 +581,12 @@ def main():
 
         # Limit samples if specified
         if args.num_samples:
-            test_data = test_data[:args.num_samples]
+            test_data = test_data[: args.num_samples]
 
         # Extract references and sources
-        references = [item.get("summary", item.get("abstract", "")) for item in test_data]
+        references = [
+            item.get("summary", item.get("abstract", "")) for item in test_data
+        ]
         sources = [item.get("article", item.get("document", "")) for item in test_data]
 
         print(f"Loaded {len(references)} samples from {args.dataset} dataset")
@@ -593,7 +600,9 @@ def main():
     else:
         # Original behavior: require predictions and references
         if not args.predictions or not args.references:
-            parser.error("--predictions and --references are required when not using --all-models")
+            parser.error(
+                "--predictions and --references are required when not using --all-models"
+            )
 
         # Load data
         with open(args.predictions, "r") as f:

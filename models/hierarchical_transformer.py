@@ -199,29 +199,29 @@ class HierarchicalTransformerSummarizer:
         import re
 
         sections = []
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         # Patterns for section headers
         patterns = [
-            (r'^#{1,6}\s+(.+)$', 'markdown'),           # Markdown headers: # Title
-            (r'^([A-Z][A-Z\s]{2,}):?\s*$', 'caps'),      # ALL CAPS HEADERS
-            (r'^(\d+\.?\s+[A-Z][^.!?]*?)$', 'numbered'), # 1. Introduction
-            (r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*):?\s*$', 'title_case'),  # Title Case:
+            (r"^#{1,6}\s+(.+)$", "markdown"),  # Markdown headers: # Title
+            (r"^([A-Z][A-Z\s]{2,}):?\s*$", "caps"),  # ALL CAPS HEADERS
+            (r"^(\d+\.?\s+[A-Z][^.!?]*?)$", "numbered"),  # 1. Introduction
+            (r"^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*):?\s*$", "title_case"),  # Title Case:
         ]
 
-        current_section = {
-            'title': 'Document',
-            'content': [],
-            'start_line': 0,
-            'type': 'default'
+        current_section: dict = {
+            "title": "Document",
+            "content": [],  # type: ignore
+            "start_line": 0,
+            "type": "default",
         }
 
         for i, line in enumerate(lines):
             line_stripped = line.strip()
 
             if not line_stripped:
-                if current_section['content']:
-                    current_section['content'].append('')
+                if current_section["content"]:
+                    current_section["content"].append("")
                 continue
 
             # Check if this line is a section header
@@ -230,43 +230,49 @@ class HierarchicalTransformerSummarizer:
                 match = re.match(pattern, line_stripped)
                 if match:
                     # Save previous section if it has content
-                    if current_section['content']:
-                        current_section['content'] = '\n'.join(current_section['content']).strip()
-                        if current_section['content']:
+                    content_list = current_section["content"]
+                    if isinstance(content_list, list) and content_list:
+                        current_section["content"] = "\n".join(content_list).strip()
+                        if current_section["content"]:
                             sections.append(current_section)
 
                     # Start new section
                     title = match.group(1).strip()
                     # Clean up markdown symbols
-                    title = re.sub(r'^#+\s*', '', title)
-                    title = re.sub(r'^\d+\.?\s*', '', title)
+                    title = re.sub(r"^#+\s*", "", title)
+                    title = re.sub(r"^\d+\.?\s*", "", title)
 
                     current_section = {
-                        'title': title,
-                        'content': [],
-                        'start_line': i,
-                        'type': header_type
+                        "title": title,
+                        "content": [],  # type: ignore
+                        "start_line": i,
+                        "type": header_type,
                     }
                     is_header = True
                     break
 
             if not is_header:
-                current_section['content'].append(line)
+                content_list = current_section["content"]
+                if isinstance(content_list, list):
+                    content_list.append(line)
 
         # Add last section
-        if current_section['content']:
-            current_section['content'] = '\n'.join(current_section['content']).strip()
-            if current_section['content']:
+        content_list = current_section["content"]
+        if isinstance(content_list, list) and content_list:
+            current_section["content"] = "\n".join(content_list).strip()
+            if current_section["content"]:
                 sections.append(current_section)
 
         # If no sections detected, return whole document as one section
         if not sections:
-            sections = [{
-                'title': 'Document',
-                'content': text,
-                'start_line': 0,
-                'type': 'default'
-            }]
+            sections = [
+                {
+                    "title": "Document",
+                    "content": text,
+                    "start_line": 0,
+                    "type": "default",
+                }
+            ]
 
         return sections
 
@@ -283,20 +289,36 @@ class HierarchicalTransformerSummarizer:
 
         # High importance sections
         high_importance = [
-            'abstract', 'introduction', 'conclusion', 'summary',
-            'results', 'findings', 'discussion', 'executive summary'
+            "abstract",
+            "introduction",
+            "conclusion",
+            "summary",
+            "results",
+            "findings",
+            "discussion",
+            "executive summary",
         ]
 
         # Medium importance sections
         medium_importance = [
-            'methods', 'methodology', 'approach', 'background',
-            'related work', 'literature review', 'analysis'
+            "methods",
+            "methodology",
+            "approach",
+            "background",
+            "related work",
+            "literature review",
+            "analysis",
         ]
 
         # Low importance sections
         low_importance = [
-            'references', 'bibliography', 'appendix', 'acknowledgments',
-            'supplementary', 'funding', 'acknowledgements'
+            "references",
+            "bibliography",
+            "appendix",
+            "acknowledgments",
+            "supplementary",
+            "funding",
+            "acknowledgements",
         ]
 
         for keyword in high_importance:
@@ -379,14 +401,14 @@ class HierarchicalTransformerSummarizer:
         section_summaries = []
 
         for section in sections:
-            importance = self.get_section_importance(section['title'])
+            importance = self.get_section_importance(section["title"])
 
             # Skip very low importance sections
             if importance < 0.5:
                 continue
 
             # Split section into paragraphs
-            paragraphs = self.split_into_paragraphs(section['content'])
+            paragraphs = self.split_into_paragraphs(section["content"])
 
             if not paragraphs:
                 continue
@@ -396,8 +418,9 @@ class HierarchicalTransformerSummarizer:
                 doc_encoding, para_encodings = self.encoder(paragraphs, self.device)
 
             # Create prompt with section context
-            section_prompt = f"Summarize the {section['title']} section: " + \
-                           " ".join(paragraphs[:min(2, len(paragraphs))])
+            section_prompt = f"Summarize the {section['title']} section: " + " ".join(
+                paragraphs[: min(2, len(paragraphs))]
+            )
 
             # Tokenize
             decoder_inputs = self.decoder_tokenizer(

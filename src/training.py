@@ -194,7 +194,9 @@ def train_model(config: Dict, output_dir: Path):
     if "hierarchical" in config:
         # Hierarchical transformer model
         print("Setting up hierarchical transformer model...")
-        paragraph_encoder_name = config["hierarchical"]["paragraph_encoder"]["model_name"]
+        paragraph_encoder_name = config["hierarchical"]["paragraph_encoder"][
+            "model_name"
+        ]
         decoder_name = config["hierarchical"]["decoder"]["model_name"]
         max_paragraph_length = config["hierarchical"]["paragraph_encoder"]["max_length"]
         max_paragraphs = config["hierarchical"]["document_encoder"]["max_paragraphs"]
@@ -207,7 +209,7 @@ def train_model(config: Dict, output_dir: Path):
 
         if skip_fine_tuning:
             print("Fine-tuning is disabled. Using pretrained models without training.")
-            print(f"Models can be loaded directly using:")
+            print("Models can be loaded using:")
             print(f"  - Paragraph encoder: {paragraph_encoder_name}")
             print(f"  - Decoder: {decoder_name}")
             return
@@ -220,7 +222,10 @@ def train_model(config: Dict, output_dir: Path):
             max_paragraphs=max_paragraphs,
         )
         model.to(device)
-        print(f"Hierarchical model initialized with {paragraph_encoder_name} encoder and {decoder_name} decoder")
+        print(
+            f"Hierarchical model initialized with {paragraph_encoder_name} encoder "
+            f"and {decoder_name} decoder"
+        )
 
     elif "longformer" in config:
         # Longformer (LED) model
@@ -261,11 +266,15 @@ def train_model(config: Dict, output_dir: Path):
 
         if skip_fine_tuning:
             print("Fine-tuning is disabled. Using pretrained model without training.")
-            print("Skipping model save - pretrained model is already cached by HuggingFace.")
+            print(
+                "Skipping model save - pretrained model is already cached by HuggingFace."
+            )
             print(f"Model can be loaded directly using: {model_name}")
             return
     else:
-        raise ValueError(f"Unsupported configuration - no abstractive or hierarchical section found")
+        raise ValueError(
+            "Unsupported configuration - no abstractive or hierarchical section found"
+        )
 
     # Create dataloaders
     print("Creating dataloaders...")
