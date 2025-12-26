@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.tox/
+tests/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Data (exclude large datasets and processed files)
+data/raw/
+data/processed/
+logs/
+models/checkpoints/
+results/
+scripts/
+
+# Notebooks (not needed in production)
+notebooks/
+*.ipynb
+
+# Documentation
+*.md
+docs/
+README.md
+latex/
+
+# Build files
+Dockerfile
+.dockerignore
+Makefile
+requirements.txt
+setup.py
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Other
+*.log
+.env
+.env.local
+wandb/
+mlruns/
+
+# Evaluation and training scripts (not needed for Streamlit)
+evaluation/
+experiments/

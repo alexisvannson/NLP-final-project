@@ -35,13 +35,8 @@ install:
 	$(PIP) install -r requirements.txt
 	$(PYTHON_VENV) -m spacy download en_core_web_sm
 	$(PYTHON_VENV) -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords')"
-	@echo "Dependencies installed successfully!"
 
-setup: install
-	@echo "Setting up project and downloading datasets..."
-	mkdir -p data/raw data/processed logs models/checkpoints
-	$(PYTHON_VENV) data/scripts/download_datasets.py
-	@echo "Setup complete!"
+
 
 lint:
 	@echo "Linting code..."

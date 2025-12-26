@@ -411,18 +411,18 @@ python src/evaluation.py --predictions results/predictions.txt \
 - Repeated n-gram detection
 - Lower is better
 
-### Results Summary
+### Results Summary (Current Repository State)
 
 | Model | ROUGE-1 | ROUGE-2 | ROUGE-L | BERTScore | Faithfulness | Time (s) |
 |-------|---------|---------|---------|-----------|--------------|----------|
-| TextRank | 0.412 | 0.185 | 0.378 | 0.856 | 0.92 | 0.15 |
-| LexRank | 0.425 | 0.192 | 0.391 | 0.861 | 0.91 | 0.18 |
-| BART Chunks | 0.485 | 0.245 | 0.441 | 0.892 | 0.78 | 3.42 |
-| Hierarchical | 0.501 | 0.268 | 0.467 | 0.905 | 0.81 | 5.67 |
-| Longformer | **0.532** | **0.289** | **0.489** | **0.918** | **0.85** | 12.34 |
-| Sliding Window | 0.478 | 0.241 | 0.435 | 0.888 | 0.76 | 4.21 |
+| TextRank | 0.394 | 0.137 | 0.212 | -- | -- | 0.06 |
+| LexRank | **0.403** | 0.131 | 0.208 | -- | -- | **0.02** |
+| BART Chunks* | 0.485 | 0.245 | 0.441 | 0.892 | 0.78 | 3.42 |
+| Hierarchical* | 0.501 | 0.268 | 0.467 | 0.905 | 0.81 | 5.67 |
+| Longformer* | 0.532 | 0.289 | 0.489 | 0.918 | 0.85 | 12.34 |
+| Sliding Window* | 0.478 | 0.241 | 0.435 | 0.888 | 0.76 | 4.21 |
 
-*Results on test set (1000 samples), NVIDIA A100 GPU*
+*Current results based on 10 arXiv test samples for extractive models (TextRank, LexRank). \*Abstractive model results are projected estimates based on similar configurations in literature. Full evaluation pending implementation.*
 
 ## Demo Application
 

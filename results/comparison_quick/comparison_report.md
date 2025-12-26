@@ -2,7 +2,7 @@
 
 **Dataset:** arxiv
 **Samples:** 10
-**Date:** 2025-12-26 10:57
+**Date:** 2025-12-26 19:43
 
 ## Results Summary
 
@@ -24,13 +24,13 @@
 
 | Model    |   Avg Time (s) |
 |:---------|---------------:|
-| textrank |           0.06 |
-| lexrank  |           0.02 |
+| textrank |           0.08 |
+| lexrank  |           0.04 |
 
 ## Key Findings
 
 - **Best ROUGE-1:** lexrank (0.4026)
-- **Fastest:** lexrank (0.02s)
+- **Fastest:** lexrank (0.04s)
 
 ## Approach Comparison
 

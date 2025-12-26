@@ -191,7 +191,7 @@ if __name__ == "__main__":
     DATASETS_TO_DOWNLOAD = {
     "arxiv": download_arxiv,
     "billsum": download_billsum,
-    # "pubmed": download_pubmed,
+    "pubmed": download_pubmed,
     # "multi_news": download_multi_news,
     # "booksum": download_booksum,
     # "cnn_dailymail": download_cnn_dailymail,

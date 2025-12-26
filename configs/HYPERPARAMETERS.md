@@ -437,5 +437,7 @@ All configs use `seed: 42` for reproducibility.
 ---
 
 **Last Updated**: December 26, 2025
-**Author**: NLP Final Project Team
-**Contact**: For questions about hyperparameters, see individual config files or open an issue.
+**Repository Status**: Active development with extractive baselines fully implemented and tested
+**Current State**: Extractive models (TextRank, LexRank) fully evaluated; Abstractive models (BART, Hierarchical, Longformer) configurations ready for training
+**Author**: Alexis VANNSON - NLP Final Project Team
+**Contact**: For questions about hyperparameters, see configs/ directory or open an issue at https://github.com/alexisvannson/NLP-project
